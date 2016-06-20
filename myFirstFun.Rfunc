@@ -1,1 +1,0 @@
-myFirstFunc <- function(n) {n*n}

@@ -1,0 +1,35 @@
+fftcomponents <- function(x,n_predict=3,harmonics=10,n=10) {
+
+## lag the time series
+	n <- length(x);
+	n_harm <- harmonics;
+	t_series <- 0:(n-1);
+	
+## generate a linear serie
+	
+	p <- polyfit(t_series,x,1);
+	x_notrend <- x - p[1]*t_series;
+	x_freqdom <- fft(x_notrend)
+	fftfreqn <- c((0:((n/2)))/n)
+	plot(fftfreqn)
+	fftfreqn <- c(fftfreqn[1:ceil(n/2)],-fftfreqn[length(fftfreqn):2])
+	print(fftfreqn)
+	indexes <- 1:(n);
+	indexes <- indexes[order(abs(fftfreqn))];
+	t_series <- 0:(n + n_predict-1);
+	restored_sig <- zeros(1,length(t_series));
+	
+	for (i in indexes[1:(n_harm*2)]) 
+		{
+		ampli <- abs(x_freqdom[i])
+		phase <- angle(x_freqdom[i])
+		print(ampli)
+		print(phase)
+		restored_sig <- restored_sig + ampli * cos(2 * pi * fftfreqn[i] * t_series + phase)
+		fftcomponents <- restored_sig
+		}
+restored_sig <- restored_sig + p[1]*t_series
+print(restored_sig)
+plot(t_series,restored_sig,type="l")
+return(fftcomponents)
+}

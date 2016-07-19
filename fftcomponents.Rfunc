@@ -1,16 +1,35 @@
 fftcomponents <- function(x,n_predict=3,harmonics=10,n=10) {
+## unlist
+	x_unlist <- as.integer(unlist(x)) 
+	
+## load the respective libraries
+	##install.packages("stats")
+	##install.packages("pracma")
+	library("stats")
+	library("pracma")
 
 ## lag the time series
-	n <- length(x);
+	print(x_unlist)
+	n <- length(x_unlist);
 	n_harm <- harmonics;
 	t_series <- 0:(n-1);
+
+## generate a periodogram of the time series
+	k <- kernel("daniell", 4) 
+	spec.pgram(x_unlist,k,spans=9, taper = 0.5, log = "no");
+	dev.new()
 	
 ## generate a linear serie
-	
-	p <- polyfit(t_series,x,1);
-	x_notrend <- x - p[1]*t_series;
+	##typeof(t_series)
+	typeof(x_unlist)	
+	p <- polyfit(t_series,x_unlist,1);
+	print(p[1])
+	x_notrend <- x_unlist - p[1]*t_series;
 	x_freqdom <- fft(x_notrend)
 	fftfreqn <- c((0:((n/2)))/n)
+	print("------>>>>>>>>>")
+	print(fftfreqn)
+	plot(fftfreqn)
 	fftfreqn <- c(fftfreqn[1:ceil(n/2)],-fftfreqn[length(fftfreqn):2])
 	indexes <- 1:(n);
 	indexes <- indexes[order(abs(fftfreqn))];
@@ -21,14 +40,17 @@ fftcomponents <- function(x,n_predict=3,harmonics=10,n=10) {
 		{
 		ampli <- abs(x_freqdom[i])/n
 		phase <- angle(x_freqdom[i])
+		print("--><--")
+		print(ampli)
+		print(phase)
 		restored_sig <- restored_sig + ampli * cos(2 * pi * fftfreqn[i] * t_series + phase)
 		fftcomponents <- restored_sig
+		print(restored_sig)
 		}
-
 restored_sig <- restored_sig + p[1]*t_series
-plot(1:size(x)[2],x,type="l")
-lines(1:size(g)[2],g,type="l")
 
+plot(restored_sig,type="l")
+plot(1:size(x_unlist)[2],x_unlist,type="l")
+lines(1:size(restored_sig)[2],restored_sig,type="l")
 return(fftcomponents)
-
 }
